@@ -1,5 +1,5 @@
 import  Jwt  from "jsonwebtoken";
-import User from "../models/authModel";
+import User from "../models/authModel.js";
 import bcrypt from "bcryptjs";
 
 
@@ -37,7 +37,9 @@ export const register =async (req,res)=>{
             })
 
             res.cookie("jwt",token,{
-                maxAge:7
+                maxAge:7*24*60*60*1000,
+                httpOnly:true, // prevent XSS attacks
+                sameSite:"strict"  // prevent CSRF attacks
             })
            return res.status(201).json({
                  userInfo,
