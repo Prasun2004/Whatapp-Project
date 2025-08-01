@@ -135,3 +135,59 @@ export const logout =async(req,res)=>{
         })
     }
 }
+
+export const onboarding =async(req,res)=>{
+     try {
+        const userId =req.user._id;
+
+        const{name,bio,nativeLanguage,learningLanguage,location} =req.body
+
+        if (!name || !bio || !nativeLanguage || !learningLanguage || !location) {
+            return res.status(400).json({
+                message:"all fields required",
+    missingFields: [
+          !fullName && "fullName",
+          !bio && "bio",
+          !nativeLanguage && "nativeLanguage",
+          !learningLanguage && "learningLanguage",
+          !location && "location",
+        ].filter(Boolean),
+            })
+        }
+
+        const updateUser =await User.findByIdAndUpdate(userId,{
+            ...req.body,
+            isOnboarded:true
+        },{new:true});
+        
+         try {
+                await createStreamUser({
+                id:updateUser._id,
+                name:updateUser.name,
+                image:updateUser.profilepic || ""
+            })
+            console.log(`stram user create ${updateUser.name}`);
+            } catch (error) {
+                console.log("some error in stream when registration done")
+            }
+
+       if (!updateUser) {
+          return res.status(404).json({
+            success:false,
+            message:"user not find to update"
+          })
+       };
+
+       return res.status(200).json({
+        success:true,
+        message:"update successfully update"
+       })
+
+     } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            success:false,
+            message:"failed  to redirect on onboarding"
+        })
+     }
+}
